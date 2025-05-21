@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BA Guess Game</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background: #101094;
+    margin: 20px;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 15px;
+    color: #95a9be;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  }
+  #character-selection {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dbdbdf;
+    background: #ccccd1;
+    padding: 10px;
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  #character-selection img {
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 8px;
+    transition: border-color 0.2s;
+    user-select: none;
+  }
+  #character-selection img.selected {
+    border-color: #007bff;
+    filter: drop-shadow(0 0 4px #007bff);
+  }
+  #game-area {
+    display: none;
+    margin-top: 20px;
+  }
+  .board-section {
+    margin-bottom: 20px;
+  }
+  .board-section h2 {
+    margin-bottom: 8px;
+  }
+  .board-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  .character-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: filter 0.3s;
+    user-select: none;
+  }
+  .character-img.dimmed {
+    filter: brightness(40%);
+  }
+  button {
+    padding: 10px 20px;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 5px;
+  }
+  button:disabled {
+    background: #999;
+    cursor: default;
+  }
+  #logo-top-right {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    height: 50px;
+    width: auto;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    z-index: 1000;
+  }
+</style>
+</head>
+<body>
+
+<img id="logo-top-right" src="image/logo.png" alt="Logo" />
+
+
+<h1>Blue Archive Guess Game</h1>
+
+<div id="character-selection"></div>
+<button id="start-game-btn" disabled>Start Game</button>
+
+<div id="game-area">
+  <div class="board-section">
+    <h2>Your Board</h2>
+    <div id="board-characters" class="board-list"></div>
+  </div>
+
+  <div class="board-section">
+    <h2>Your Operator (Target)</h2>
+    <img id="operator-character" class="character-img" src="" alt="Your Operator Character" />
+  </div>
+
+  <button id="end-game-btn">End Game</button>
+</div>
+
+<script>
+  const characters = [
+    { name: "Yuzu (Maid)", image: "image/yuzumaid.png" },
+{ name: "Yoshimi", image: "image/yoshimi.png" },
+{ name: "Suzumi", image: "image/suzumi.png" },
+{ name: "Shizuko (Swimsuit)", image: "image/shizukoswimsuit.png" },
+{ name: "Shimiko", image: "image/shimiko.png" },
+{ name: "Serina", image: "image/serina.png" },
+{ name: "Saten Ruiko", image: "image/satenruiko.png" },
+{ name: "Pina", image: "image/pina.png" },
+{ name: "Nodoka", image: "image/nodoka.png" },
+{ name: "Miyu (Swimsuit)", image: "image/miyuswimsuit.png" },
+{ name: "Mineidol", image: "image/mineidol.png" },
+{ name: "Kotori", image: "image/kotori.png" },
+{ name: "Kotama", image: "image/kotama.png" },
+{ name: "Koharu (Swimsuit)", image: "image/koharuswimsuit.png" },
+{ name: "Kirino (Swimsuit)", image: "image/kirinoswimsuit.png" },
+{ name: "Karin (School Uniform)", image: "image/karinschool.png" },
+{ name: "Junko (New Year)", image: "image/junkonewyear.png" },
+{ name: "Ibuki", image: "image/ibuki.png" },
+{ name: "Hibiki (Cheerleader)", image: "image/hibikicheerleader.png" },
+{ name: "Hasumi (Sportswear)", image: "image/hasumisport.png" },
+{ name: "Haruka", image: "image/haruka.png" },
+{ name: "Fubuki", image: "image/fubuki.png" },
+{ name: "Ayane (Swimsuit)", image: "image/ayaneswimsuit.png" },
+{ name: "Asuna", image: "image/asuna.png" },
+{ name: "Aoba", image: "image/aoba.png" },
+{ name: "Airiband", image: "image/airiband.png" },
+{ name: "Yuuka", image: "image/yuuka.png" },
+{ name: "Utaha", image: "image/utaha.png" },
+{ name: "Tsubaki", image: "image/tsubaki.png" },
+{ name: "Shizuko", image: "image/shizuko.png" },
+{ name: "Serika", image: "image/serika.png" },
+{ name: "Nonomi", image: "image/nonomi.png" },
+{ name: "Mutsuki", image: "image/mutsuki.png" },
+{ name: "Momoi", image: "image/momoi.png" },
+{ name: "Kirino", image: "image/kirino.png" },
+{ name: "Kayoko", image: "image/kayoko.png" },
+{ name: "Junko", image: "image/junko.png" },
+{ name: "Hasumi", image: "image/hasumi.png" },
+{ name: "Hare", image: "image/hare.png" },
+{ name: "Hanako", image: "image/hanako.png" },
+{ name: "Hanae", image: "image/hanae.png" },
+{ name: "Fuuka", image: "image/fuuka.png" },
+{ name: "Chise", image: "image/chise.png" },
+{ name: "Ayane", image: "image/ayane.png" },
+{ name: "Akari", image: "image/akari.png" },
+{ name: "Akane", image: "image/akane.png" },
+{ name: "Airi", image: "image/airi.png" },
+{ name: "Yuuka (Pajama)", image: "image/yuukapajama.png" },
+{ name: "Yukari", image: "image/yukari.png" },
+{ name: "Yoshimi (Band)", image: "image/yoshimiband.png" },
+{ name: "Wakao (Swimsuit)", image: "image/wakamoswimsuit.png" },
+{ name: "Wakamo", image: "image/wakamo.png" },
+{ name: "Utaha (Cheerleader)", image: "image/utahacheerleader.png" },
+{ name: "Umika", image: "image/umika.png" },
+{ name: "Ui (Swimsuit)", image: "image/uiswimsuit.png" },
+{ name: "Tsurugi", image: "image/tsurugi.png" },
+{ name: "Tsukuyo", image: "image/tsukuyo.png" },
+{ name: "Tsubaki (Guide)", image: "image/tsubakiguide.png" },
+{ name: "Tomoe (Qipao)", image: "image/tomoeqipao.png" },
+{ name: "Toki (Bunny Girl)", image: "image/tokibunny.png" },
+{ name: "Toki", image: "image/toki.png" },
+{ name: "Sumire (Part-Time)", image: "image/sumirepart.png" },
+{ name: "Sumire", image: "image/sumire.png" },
+{ name: "Shun (Kid)", image: "image/shunkid.png" },
+{ name: "Shun", image: "image/shun.png" },
+{ name: "Shokuhou Misaki", image: "image/shokuhoumisaki.png" },
+{ name: "Shiroko Terror", image: "image/shirokoterror.png" },
+{ name: "Shiroko (Swimsuit)", image: "image/shirokoswimsuit.png" },
+{ name: "Shiroko (Riding)", image: "image/shirokoriding.png" },
+{ name: "Shiroko", image: "image/shiroko.png" },
+{ name: "Shigure (Hot Spring)", image: "image/shigurespring.png" },
+{ name: "Shigure", image: "image/shigure.png" },
+{ name: "Serina (Christmas)", image: "image/serinachristmas.png" },
+{ name: "Serika (New Year)", image: "image/serikanewyear.png" },
+{ name: "Sena (Casual)", image: "image/senacasual.png" },
+{ name: "Sena", image: "image/sena.png" },
+{ name: "Saya (Casual)", image: "image/sayacasual.png" },
+{ name: "Saya", image: "image/saya.png" },
+{ name: "Satsuki", image: "image/satsuki.png" },
+{ name: "Saori (Swimsuit)", image: "image/saoriswimsuit.png" },
+{ name: "Saori (Dress)", image: "image/saoridress.png" },
+{ name: "Saor", image: "image/saori.png" },
+{ name: "Sakurako (Idol)", image: "image/sakurakoidol.png" },
+{ name: "Sakurako", image: "image/sakurako.png" },
+{ name: "Saki (Swimsuit)", image: "image/sakiswimsuit.png" },
+{ name: "Saki", image: "image/saki.png" },
+{ name: "Rumi", image: "image/rumi.png" },
+{ name: "Rio", image: "image/rio.png" },
+{ name: "Renge", image: "image/renge.png" },
+{ name: "Reisa", image: "image/reisa.png" },
+{ name: "Rei", image: "image/rei.png" },
+{ name: "Pina (Guide)", image: "image/pinaguide.png" },
+{ name: "Nozomi", image: "image/nozomi.png" },
+{ name: "Nonomi (Swimsuit)", image: "image/nonomiswimsuit.png" },
+{ name: "Nodoka (Hot Spring)", image: "image/nodokaspring.png" },
+{ name: "Noa (Pajama)", image: "image/noapajama.png" },
+{ name: "Neru (School Uniform)", image: "image/neruschool.png" },
+{ name: "Neru (Bunny Girl)", image: "image/nerubunny.png" },
+{ name: "Natsu", image: "image/natsu.png" },
+{ name: "Nagisa", image: "image/nagisa.png" },
+{ name: "Mutsuki (New Year)", image: "image/mutsukinewyear.png" },
+{ name: "Momoi (Maid)", image: "image/momoimaid.png" },
+{ name: "Moe (Swimsuit)", image: "image/moeswimsuit.png" },
+{ name: "Miyako (Swimsuit)", image: "image/miyakoswimsuit.png" },
+{ name: "Miyako", image: "image/miyako.png" },
+{ name: "Misaki", image: "image/misaki.png" },
+{ name: "Misaka", image: "image/misaka.png" },
+{ name: "Mine", image: "image/mine.png" },
+{ name: "Mina", image: "image/mina.png" },
+{ name: "Mimori (Swimsuit)", image: "image/mimoriswimsuit.png" },
+{ name: "Mimori", image: "image/mimori.png" },
+{ name: "Mika", image: "image/mika.png" },
+{ name: "Midori (Maid)", image: "image/midorimaid.png" },
+{ name: "Midori", image: "image/midori.png" },
+{ name: "Mashiro (Swimsuit)", image: "image/mashiroswimsuit.png" },
+{ name: "Mashiro", image: "image/mashiro.png" },
+{ name: "Marina (Qipao)", image: "image/marinaqipao.png" },
+{ name: "Marina", image: "image/marina.png" },
+{ name: "Mari (Sportswear)", image: "image/marisport.png" },
+{ name: "Mari (Idol)", image: "image/mariidol.png" },
+{ name: "Makoto", image: "image/makoto.png" },
+{ name: "Maki (Camping)", image: "image/makicamp.png" },
+{ name: "Maki", image: "image/maki.png" },
+{ name: "Koyuki", image: "image/koyuki.png" },
+{ name: "Kotomi (Cheerleader)", image: "image/kotomicheer.png" },
+{ name: "Kotama (Camping)", image: "image/kotamacamp.png" },
+{ name: "Kokona", image: "image/kokona.png" },
+{ name: "Kisaki", image: "image/kisaki.png" },
+{ name: "Kirara", image: "image/kirara.png" },
+{ name: "Kikyo", image: "image/kikyo.png" },
+{ name: "Kazusa (Band)", image: "image/kazusaband.png" },
+{ name: "Kazusa", image: "image/kazusa.png" },
+{ name: "Kayoko (New Year)", image: "image/kayokonewyear.png" },
+{ name: "Kayoko (Dress)", image: "image/kayokodress.png" },
+{ name: "Kasumi", image: "image/kasumi.png" },
+{ name: "Karin (Bunny Girl)", image: "image/karinbunny.png" },
+{ name: "Karin", image: "image/karin.png" },
+{ name: "Kanna (Swimsuit)", image: "image/kannaswimsuit.png" },
+{ name: "Kanna", image: "image/kanna.png" },
+{ name: "Kaho", image: "image/kaho.png" },
+{ name: "Kaede", image: "image/kaede.png" },
+{ name: "Juri (Part-Time)", image: "image/juripart.png" },
+{ name: "Izuna (Swimsuit)", image: "image/izunaswimsuit.png" },
+{ name: "Izuna", image: "image/izuna.png" },
+{ name: "Izumi (New Year)", image: "image/izuminewyear.png" },
+{ name: "Izumi", image: "image/izumi.png" },
+{ name: "Iroha", image: "image/iroha.png" },
+{ name: "Iori (Swimsuit)", image: "image/ioriswimsuit.png" },
+{ name: "Ichika", image: "image/ichika.png" },
+{ name: "Hoshino (Swimsuit)", image: "image/hoshinoswimsuit.png" },
+{ name: "Hoshino (Battle)", image: "image/hoshinobattle.png" },
+{ name: "Hoshino", image: "image/hoshino.png" },
+{ name: "Hiyori (Swimsuit)", image: "image/hiyoriswimsuit.png" },
+{ name: "Hiyori", image: "image/hiyori.png" },
+{ name: "Hinata (Swimsuit)", image: "image/hinataswimsuit.png" },
+{ name: "Hinata", image: "image/hinata.png" },
+{ name: "Hina (Swimsuit)", image: "image/hinaswimsuit.png" },
+{ name: "Hina (Dress)", image: "image/hinadress.png" },
+{ name: "Hina", image: "image/hina.png" },
+{ name: "Hikari", image: "image/hikari.png" },
+{ name: "Hifumi (Swimsuit)", image: "image/hifumiswimsuit.png" },
+{ name: "Hifumi", image: "image/hifumi.png" },
+{ name: "Hibiki", image: "image/hibiki.png" },
+{ name: "Haruna (Sportswear)", image: "image/harunasport.png" },
+{ name: "Haruna (New Year)", image: "image/harunanewyear.png" },
+{ name: "Haruna", image: "image/haruna.png" },
+{ name: "Haruka (New Year)", image: "image/harukanewyear.png" },
+{ name: "Harecamp", image: "image/harecamp.png" },
+{ name: "Hanako (Swimsuit)", image: "image/hanakoswimsuit.png" },
+{ name: "Hanae (Christmas)", image: "image/hanaechristmas.png" },
+{ name: "Fuuka (New Year)", image: "image/fuukanewyear.png" },
+{ name: "Fubuki (Swimsuit)", image: "image/fubukiswimsuit.png" },
+{ name: "Eimi", image: "image/eimi.png" },
+{ name: "Chinatsu (Hot Spring)", image: "image/chinatsuspring.png" },
+{ name: "Chihiro", image: "image/chihiro.png" },
+{ name: "Chiaki", image: "image/chiaki.png" },
+{ name: "Cherino (Hot Spring)", image: "image/cherinospring.png" },
+{ name: "Cherino", image: "image/cherino.png" },
+{ name: "Azusa (Swimsuit)", image: "image/azusaswimsuit.png" },
+{ name: "Azusa", image: "image/azusa.png" },
+{ name: "Atsuko", image: "image/atsuko.png" },
+{ name: "Asuna (School Uniform)", image: "image/asunaschool.png" },
+{ name: "Asuna (Bunny Girl)", image: "image/asunabunny.png" },
+{ name: "Aru (New Year)", image: "image/arunewyear.png" },
+{ name: "Aru (Dress)", image: "image/arudress.png" },
+{ name: "Arisu (Maid)", image: "image/arisumais.png" },
+{ name: "Ako (Dress)", image: "image/akodress.png" },
+{ name: "Ako", image: "image/ako.png" },
+{ name: "Akari (New Year)", image: "image/akarinewyear.png" },
+{ name: "Akane (Bunny Girl)", image: "image/akanebunny.png" },
+    // Tambah karakter sesukamu di sini
+  ];
+
+  const selectionDiv = document.getElementById('character-selection');
+  const startBtn = document.getElementById('start-game-btn');
+  const gameArea = document.getElementById('game-area');
+  const boardCharactersDiv = document.getElementById('board-characters');
+  const operatorCharImg = document.getElementById('operator-character');
+  const endGameBtn = document.getElementById('end-game-btn');
+
+  let selectedCharacters = new Set();
+
+  // Tampilkan semua karakter di pilihan awal
+  function showCharacterSelection() {
+    selectionDiv.innerHTML = '';
+    characters.forEach((char, idx) => {
+      const img = document.createElement('img');
+      img.src = char.image;
+      img.alt = char.name;
+      img.title = char.name;
+      img.onclick = () => {
+        if(selectedCharacters.has(char)) {
+          selectedCharacters.delete(char);
+          img.classList.remove('selected');
+        } else {
+          selectedCharacters.add(char);
+          img.classList.add('selected');
+        }
+        startBtn.disabled = selectedCharacters.size === 0;
+      };
+      selectionDiv.appendChild(img);
+    });
+  }
+
+  // Mulai game: sembunyikan pilihan, acak operator, tampilkan board & operator
+  startBtn.onclick = () => {
+    if(selectedCharacters.size === 0) return;
+
+    // Hide selection area
+    selectionDiv.style.display = 'none';
+    startBtn.style.display = 'none';
+
+    // Pilih acak operator dari selectedCharacters
+    const arr = Array.from(selectedCharacters);
+    const randomIndex = Math.floor(Math.random() * arr.length);
+    const operatorChar = arr[randomIndex];
+
+    // Tampilkan operator
+    operatorCharImg.src = operatorChar.image;
+    operatorCharImg.alt = operatorChar.name;
+    operatorCharImg.title = operatorChar.name;
+    operatorCharImg.classList.remove('dimmed');
+
+    // Tampilkan Your Board (semua karakter yang dipilih)
+    boardCharactersDiv.innerHTML = '';
+    arr.forEach(char => {
+      const img = document.createElement('img');
+      img.src = char.image;
+      img.alt = char.name;
+      img.title = char.name;
+      img.className = 'character-img';
+      img.onclick = () => {
+        img.classList.toggle('dimmed');
+      };
+      boardCharactersDiv.appendChild(img);
+    });
+
+    gameArea.style.display = 'block';
+  };
+
+  // End game: reset semua, tampilkan pemilihan karakter lagi
+  endGameBtn.onclick = () => {
+    selectedCharacters.clear();
+    startBtn.disabled = true;
+    selectionDiv.style.display = 'grid';
+    startBtn.style.display = 'inline-block';
+    gameArea.style.display = 'none';
+    showCharacterSelection();
+  };
+
+  // Inisialisasi awal
+  showCharacterSelection();
+</script>
+
+</body>
+</html>
